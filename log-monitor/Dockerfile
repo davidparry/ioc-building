@@ -5,7 +5,9 @@
 FROM python:3.12-alpine
 WORKDIR /app
 COPY log_monitor.py .
-ENV LOG_FILE=/logs/app.log \
+# Unbuffered stdout so `docker logs log-monitor` shows activity immediately.
+ENV PYTHONUNBUFFERED=1 \
+    LOG_FILE=/logs/app.log \
     WEBHOOK_URL=http://code-review:8090/webhook/bugreport \
     SERVICE_NAME=ioc-building
 # The log file only exists once ioc-building has written its first line.
