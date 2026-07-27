@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.davidparry'
+version = '0.1.0-SNAPSHOT'
+description = 'Building IoT microservice: ingests LoRaWAN sensor uplinks and decodes them with lora-codecs'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+def loraCodecsJar = file('libs/lora-codecs-0.0.1-SNAPSHOT.jar')
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // lora-codecs is not published to a public repository anymore (the old OSS
+    // Sonatype snapshots host is gone); build it from source into libs/ with
+    // scripts/build-lora-codecs.sh (the Dockerfile does this automatically).
+    implementation files(loraCodecsJar)
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('compileJava') {
+    doFirst {
+        if (!loraCodecsJar.exists()) {
+            throw new GradleException(
+                    "Missing ${loraCodecsJar}. Run scripts/build-lora-codecs.sh " +
+                    "(set LORA_CODECS_DIR if the lora-codecs checkout is not a sibling directory).")
+        }
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
