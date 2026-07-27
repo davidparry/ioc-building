@@ -4,3 +4,5 @@ build
 libs
 .idea
 *.iml
+# The log-monitor microservice has its own image built from log-monitor/
+log-monitor
